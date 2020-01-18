@@ -1,7 +1,7 @@
 import requests
 
 import paths
-from entities import Position, Market
+from entities import *
 
 class API:
     def __init__(self, key, ID, password):
@@ -13,20 +13,31 @@ class API:
 
 
     def getOrders(self):
+        self.HEADER['VERSION'] = '2'
         return self.get(paths.ORDER).json()['workingOrders']
 
     def getPositions(self):
-        # return self.get(paths.POSITION).json()['positions']
+        self.HEADER['VERSION'] = '2'
         return [Position(json) for json in self.get(paths.POSITION).json()['positions']]
+
+    def getMarket(self, market):
+        self.HEADER['VERSION'] = '2'
+        return self.get(paths.MARKET, {'epics' : market}).json()
+
+    def getPrices(self, market, timeFrame="MINUTE", nPeriods="10"):
+        self.HEADER['VERSION'] = '3'
+        params = {'resolution':timeFrame, 'max':str(nPeriods)}
+
+        return PricesRange(self.get(paths.PRICE + market, params).json(), timeFrame)
 
     def getWatchlist(self):
         return self.get(paths.WATCHLIST).json()
     
-    def get(self, url):
-        return requests.get(url, headers=self.HEADER, json=self.BODY)
+    def get(self, url, params={}):
+        return requests.get(url, headers=self.HEADER, json=self.BODY, params=params)
 
-    def post(self, url):
-        return requests.post(url, headers=self.HEADER, json=self.BODY)
+    def post(self, url, params={}):
+        return requests.post(url, headers=self.HEADER, json=self.BODY, params=params)
                        
     def authenticate(self):
         self.HEADER = {

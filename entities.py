@@ -21,11 +21,7 @@ class Position:
         self.limitedRiskPremium = positionJson['limitedRiskPremium']
 
     def __str__(self):
-        result = self.market.instrumentName + ":\n"
-        for key in self.json:
-            result += key + " " + str(self.json[key]) + "\n"
-
-        return result
+        return "Position" + formatJson(self.json)
 
 class Market:
     def __init__(self, json):
@@ -46,8 +42,67 @@ class Market:
         self.delayTime = json['delayTime']
     
     def __str__(self):
-        result = ""
-        for key in self.json:
-            result += key + " " + self.json[key] + "\n"
+        return "Market" + formatJson(self.json)
+    
+class PricesRange:
+    def __init__(self, json, timeFrame):
+        self.json = json
+        self.prices = [Prices(price) for price in json['prices']]
+        self.timeFrame = timeFrame
+        self.nPeriods = len(self.prices)
 
-        return result
+    def movingAverage(self, start, end):
+        if (start >= end):
+            return 0
+        
+        avg = 0 
+
+        for price in self.prices[start:end]:
+            avg += price.closePrice.price
+
+        return avg/(end - start)   
+        
+    def __str__(self):
+        return "PricesRange" + formatJson(self.json)
+
+class Prices:
+    def __init__(self, json):
+        self.json = json
+        self.time = json['snapshotTime']
+        self.timeUTC = json['snapshotTimeUTC']
+        self.openPrice = Price(json['openPrice'])
+        self.closePrice = Price(json['closePrice'])
+        self.highPrice = Price(json['highPrice'])
+        self.lowPrice = Price(json['lowPrice'])
+        self.lastTradedVolume = json['lastTradedVolume']
+
+    def __str__(self):
+        return "Prices" + formatJson(self.json)
+
+
+class Price:
+    def __init__(self, json):
+        self.json = json
+        self.bid = json['bid']
+        self.ask = json['ask']
+        self.price = (self.bid + self.ask)/2 # avg of bid and ask to calculate price
+        self.lastTraded = json['lastTraded']
+    
+    def __str__(self):
+        return "Price" + formatJson(self.json)
+
+
+
+
+
+
+
+def formatJson(json):
+    result = ""
+    for key in json:
+        value = json[key]
+        result += ("\n|%s| = |%s|" % (key, value))
+
+    return result
+
+
