@@ -24,7 +24,7 @@ class Graph():
 
         self.graph.add_trace(data)
 
-    def addMovingAverage(self, nPeriods):
+    def _addMovingAverage(self, nPeriods):
         movingAverages = []
         for i in range(len(self.x) - nPeriods + 1):
             movingAverages.append(self.priceRange.movingAverage(i, i + nPeriods))
@@ -32,6 +32,10 @@ class Graph():
         data = plot.Scatter(x=self.x[nPeriods - 1:], y=movingAverages)
         self.graph.add_trace(data)
     
+    def addMovingAverage(self, nPeriods):
+        data = plot.Scatter(x=self.x[nPeriods - 1:], y=self.priceRange.movingAverages(nPeriods))
+        self.graph.add_trace(data)    
+
     def reset(self):
         self.graph = plot.Figure()
         self.graph.update_layout(title=self.priceRange.market, xaxis_title="time", yaxis_title='price')

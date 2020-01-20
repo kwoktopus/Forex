@@ -46,9 +46,14 @@ class Market:
     
 class PricesRange:
     def __init__(self, json, timeFrame, market):
+            
         self.market = market
         self.json = json
-        self.prices = [Prices(price) for price in json['prices']]
+        if "errorCode" in json:
+            self.prices = []
+        else:
+            self.prices = [Prices(price) for price in json['prices']]
+        
         self.timeFrame = timeFrame
         self.nPeriods = len(self.prices)
 
@@ -62,7 +67,27 @@ class PricesRange:
             avg += price.closePrice.price
 
         return avg/(end - start)   
-        
+    
+    def movingAverages(self, nPeriods):
+        if nPeriods > len(self.prices) or nPeriods < 1:
+            return []            
+
+        results = []
+
+        runningAvg = 0
+        for price in self.prices[:nPeriods]:
+            runningAvg += price.closePrice.price
+
+        results.append(runningAvg/nPeriods)
+
+        for i in range(nPeriods, len(self.prices)):
+            runningAvg += self.prices[i].closePrice.price
+            runningAvg -= self.prices[i - nPeriods].closePrice.price
+
+            results.append(runningAvg/nPeriods)
+
+        return results
+
     def __str__(self):
         return "PricesRange" + formatJson(self.json)
 

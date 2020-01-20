@@ -2,6 +2,7 @@ import requests
 
 import paths
 from entities import *
+from decorators import runtime
 
 class API:
     def __init__(self, key, ID, password):
@@ -11,6 +12,9 @@ class API:
 
         print (self.authenticate())
 
+    def openPosition(self, market, direction, size, orderType="MARKET"):
+        print ("OPENING POSITION")
+        pass
 
     def getOrders(self):
         self.HEADER['VERSION'] = '2'
@@ -22,13 +26,22 @@ class API:
 
     def getMarket(self, market):
         self.HEADER['VERSION'] = '2'
-        return self.get(paths.MARKET, {'epics' : market}).json()
+        return self.get(paths.MARKET, {'epics' : market}).json()['marketDetails'][0]
 
     def getPrices(self, market, timeFrame="MINUTE", nPeriods="10"):
         self.HEADER['VERSION'] = '3'
         params = {'resolution':timeFrame, 'max':str(nPeriods), 'pageSize' : str(nPeriods)}
-
-        return PricesRange(self.get(paths.PRICE + market, params).json(), timeFrame, market)
+        json = self.get(paths.PRICE + market, params).json()
+        return PricesRange(json, timeFrame, market)
+    
+    # @runtime
+    def getCurrentPrice(self, market):
+        price = {}
+        snapshot = self.getMarket(market)['snapshot']
+        price['bid'] = snapshot['bid']
+        price['ask'] = snapshot['offer']
+        price['lastTraded'] = None
+        return Price(price)
 
     def getWatchlist(self):
         return self.get(paths.WATCHLIST).json()
