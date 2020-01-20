@@ -26,9 +26,9 @@ class API:
 
     def getPrices(self, market, timeFrame="MINUTE", nPeriods="10"):
         self.HEADER['VERSION'] = '3'
-        params = {'resolution':timeFrame, 'max':str(nPeriods)}
+        params = {'resolution':timeFrame, 'max':str(nPeriods), 'pageSize' : str(nPeriods)}
 
-        return PricesRange(self.get(paths.PRICE + market, params).json(), timeFrame)
+        return PricesRange(self.get(paths.PRICE + market, params).json(), timeFrame, market)
 
     def getWatchlist(self):
         return self.get(paths.WATCHLIST).json()

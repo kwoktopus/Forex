@@ -45,18 +45,19 @@ class Market:
         return "Market" + formatJson(self.json)
     
 class PricesRange:
-    def __init__(self, json, timeFrame):
+    def __init__(self, json, timeFrame, market):
+        self.market = market
         self.json = json
         self.prices = [Prices(price) for price in json['prices']]
         self.timeFrame = timeFrame
         self.nPeriods = len(self.prices)
+
 
     def movingAverage(self, start, end):
         if (start >= end):
             return 0
         
         avg = 0 
-
         for price in self.prices[start:end]:
             avg += price.closePrice.price
 
